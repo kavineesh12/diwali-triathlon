@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Three Diwali mini-games over a Gurgaon festival night. Play, post your best, top the leaderboard.">
+<style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>Diwali Triathlon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: a night courtyard. Game canvas is the hero; the leaderboard sits beside it on desktop, below it on phones. Single dark look by choice. */
+:root {
+  --night: #120a26;
+  --plum: #23143f;
+  --plum-2: #2e1b52;
+  --line: rgba(251, 240, 220, 0.14);
+  --text: #fbf0dc;
+  --muted: #c3b2d6;
+  --marigold: #f7a531;
+  --gold: #ffd57e;
+  --rani: #e8457f;
+  --leaf: #4cc79a;
+  --display: "Yatra One", "Georgia", serif;
+  --body: "Mukta", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  background:
+    linear-gradient(180deg, rgba(14, 7, 30, 0.35) 0%, rgba(14, 7, 30, 0.55) 55%, rgba(14, 7, 30, 0.85) 100%),
+    url("diwali-gurgaon.jpg") center / cover no-repeat fixed,
+    radial-gradient(120% 80% at 50% 0%, var(--plum) 0%, var(--night) 60%) fixed,
+    var(--night);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.app {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+}
+h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.head-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pill .lamps { letter-spacing: 2px; }
+.icon-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: 600 14px var(--body);
+  cursor: pointer;
+}
+.icon-btn:focus-visible, .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (min-width: 920px) {
+  .main { grid-template-columns: minmax(0, 1fr) 340px; }
+}
+.stage-wrap {
+  position: relative;
+  width: min(100%, max(300px, calc((100dvh - 120px) * 600 / 720)));
+  max-width: 100%;
+  aspect-ratio: 600 / 720;
+  margin-inline: auto;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 80px -30px rgba(247, 165, 49, 0.35);
+  background: var(--night);
+}
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; cursor: pointer; }
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  padding: 16px;
+  background: rgba(14, 7, 30, 0.4);
+  overflow-y: auto;
+}
+.overlay.solid { background: rgba(10, 5, 22, 0.8); }
+.card {
+  margin: auto;
+  width: min(440px, 100%);
+  background: linear-gradient(180deg, rgb(46, 27, 82), rgb(28, 16, 52));
+  border: 1px solid rgba(255, 213, 126, 0.28);
+  border-radius: 16px;
+  padding: clamp(16px, 4vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+.card h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(24px, 5vw, 32px);
+  line-height: 1.15;
+  color: var(--gold);
+  text-wrap: balance;
+}
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.card .lede { color: var(--text); }
+.chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.chip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  min-width: 96px;
+}
+.chip b { font-size: 14px; }
+.chip span { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font: 800 16px var(--body);
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--gold), var(--marigold));
+  color: #2a1300;
+  box-shadow: 0 8px 24px -10px rgba(247, 165, 49, 0.8);
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  font-weight: 700;
+}
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.btn-row .btn { flex: 1 1 160px; }
+.big-score {
+  font-family: var(--display);
+  font-size: clamp(44px, 11vw, 64px);
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.breakdown div {
+  padding: 8px 4px; border-radius: 10px; background: rgba(255, 255, 255, 0.05);
+  display: flex; flex-direction: column; font-variant-numeric: tabular-nums;
+}
+.breakdown span { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.breakdown b { font-size: 18px; }
+.note { font-size: 13px !important; }
+.badge {
+  align-self: center;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(76, 199, 154, 0.16); color: var(--leaf);
+  font-weight: 700; font-size: 13px;
+}
+.steps {
+  margin: 0; padding: 0; list-style: none; counter-reset: step;
+  display: flex; flex-direction: column; gap: 8px; text-align: left;
+}
+.steps li {
+  counter-increment: step;
+  display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start;
+  color: var(--text); font-size: 15px; line-height: 1.4;
+}
+.steps li::before {
+  content: counter(step);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--marigold); color: #2a1300; font-weight: 800; font-size: 14px;
+}
+.link-btn {
+  appearance: none; background: none; border: 0; padding: 4px;
+  color: var(--muted); font: 600 14px var(--body); text-decoration: underline; cursor: pointer;
+  align-self: center;
+}
+.link-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.name-form { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.name-form label { font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 0.04em; }
+.name-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.name-row input {
+  flex: 1 1 160px; min-width: 0;
+  background: rgba(0, 0, 0, 0.3); color: var(--text);
+  border: 1px solid rgba(255, 213, 126, 0.4); border-radius: 12px;
+  padding: 11px 12px; font: 600 16px var(--body);
+}
+.name-row input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.name-row .btn { flex: 0 0 auto; }
+.copybox {
+  width: 100%; min-height: 70px; resize: none;
+  background: rgba(0, 0, 0, 0.25); color: var(--text);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px;
+  font: 14px var(--body);
+}
+
+/* Leaderboard */
+.board {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(24, 13, 46, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.board h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--gold);
+}
+.board .sub { margin: 0; color: var(--muted); font-size: 14px; }
+.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: grid;
+  grid-template-columns: 30px 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.row.me { background: rgba(247, 165, 49, 0.14); outline: 1px solid rgba(247, 165, 49, 0.45); }
+.rank {
+  font-family: var(--display);
+  font-size: 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.row:nth-child(1) .rank { color: var(--gold); }
+.row:nth-child(2) .rank { color: #e6dcef; }
+.row:nth-child(3) .rank { color: #e39a5f; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: var(--plum-2); }
+.who { min-width: 0; display: flex; flex-direction: column; }
+.who b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+.who small { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pts { font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.empty {
+  padding: 18px 12px; text-align: center; color: var(--muted);
+  border: 1px dashed var(--line); border-radius: 12px; font-size: 14px;
+}
+.mine {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.mine b { color: var(--text); }
+.rules { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <span class="eyebrow">VDB · Diwali 2026</span>
+      <h1>Diwali Triathlon</h1>
+    </div>
+    <div class="head-actions">
+      <span class="pill" id="attemptPill"><span class="lamps" id="lamps">🪔</span><span id="attemptText">Play as often as you like</span></span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="stage-wrap" id="stageWrap">
+      <canvas id="cv" width="600" height="720" aria-label="Game area"></canvas>
+      <div class="overlay" id="ov"></div>
+    </div>
+
+    <aside class="board" aria-live="polite">
+      <div>
+        <h3>Top 5</h3>
+        <p class="sub">Best posted combined scores.</p>
+      </div>
+      <ol class="rows" id="rows"><li class="empty">Loading the leaderboard…</li></ol>
+      <div class="mine" id="mine" hidden></div>
+      <ul class="rules">
+        <li>Three games in a row: reflexes, timing, memory.</li>
+        <li>Play as many times as you like. Your best run is remembered.</li>
+        <li>Post your best to the leaderboard whenever you're ready.</li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(() => {
+"use strict";
+
+const W = 600, H = 720;
+const C = {
+  text: "#fbf0dc", muted: "#c3b2d6", gold: "#ffd57e", marigold: "#f7a531",
+  rani: "#e8457f", leaf: "#4cc79a", night: "#120a26",
+};
+const FIRE_COLORS = ["#ffd57e", "#f7a531", "#e8457f", "#4cc79a", "#7fd3ff", "#c79bff", "#ff7a45"];
+const PETALS = ["#f7a531", "#e8457f", "#33c6c0", "#6fcf5b", "#ff5a36", "#ffd57e", "#a678ff", "#fff3e0"];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const $ = (s) => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+const fmt = (n) => Math.round(n).toLocaleString("en-US");
+const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+const cleanName = (v) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, 24) : "");
+
+/* ---------- canvas ---------- */
+const cv = $("#cv");
+const ctx = cv.getContext("2d");
+function fit() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+fit();
+addEventListener("resize", fit);
+
+const STARS = Array.from({ length: 80 }, () => ({
+  x: Math.random() * W, y: Math.random() * H * 0.72, r: Math.random() < 0.15 ? 2 : 1,
+  a: rand(0.25, 0.85), sp: rand(0.6, 2.2), ph: rand(0, 6.28),
+}));
+
+/* ---------- sound ---------- */
+let actx = null, muted = false, noiseBuf = null;
+function initAudio() {
+  if (actx) return;
+  try {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    noiseBuf = actx.createBuffer(1, actx.sampleRate * 0.5, actx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+  } catch (e) { actx = null; }
+}
+function tone(f, d = 0.12, type = "sine", v = 0.07, slide = 0) {
+  if (muted || !actx) return;
+  const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t + d);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + d + 0.02);
+}
+function boom(v = 0.12) {
+  if (muted || !actx || !noiseBuf) return;
+  const t = actx.currentTime, s = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
+  s.buffer = noiseBuf; f.type = "lowpass"; f.frequency.value = 1400;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+  s.connect(f).connect(g).connect(actx.destination); s.start(t);
+}
+$("#soundBtn").addEventListener("click", (e) => {
+  initAudio();
+  muted = !muted;
+  e.currentTarget.textContent = muted ? "Sound off" : "Sound on";
+  e.currentTarget.setAttribute("aria-pressed", String(!muted));
+});
+
+/* ---------- shared effects ---------- */
+let particles = [], floats = [];
+function burst(x, y, color, n = 50, power = 1) {
+  const count = reduced ? Math.ceil(n / 2) : n;
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, sp = rand(40, 230) * power;
+    const life = rand(0.7, 1.4);
+    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life, max: life,
+      color: Math.random() < 0.25 ? "#fff6dc" : color, size: Math.random() < 0.3 ? 3 : 2 });
+  }
+}
+function floatText(x, y, text, color = C.gold, size = 22) {
+  floats.push({ x, y, text, color, size, life: 1.1, max: 1.1 });
+}
+function updateFx(dt) {
+  for (const p of particles) {
+    p.vx *= 0.985; p.vy = p.vy * 0.985 + 95 * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+  }
+  particles = particles.filter((p) => p.life > 0);
+  for (const f of floats) { f.y -= 38 * dt; f.life -= dt; }
+  floats = floats.filter((f) => f.life > 0);
+}
+function drawFx() {
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (const p of particles) {
+    ctx.globalAlpha = clamp(p.life / p.max, 0, 1);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.textAlign = "center";
+  for (const f of floats) {
+    ctx.globalAlpha = clamp(f.life / f.max * 1.4, 0, 1);
+    ctx.font = `800 ${f.size}px Mukta, system-ui, sans-serif`;
+    ctx.fillStyle = "rgba(0,0,0,.45)";
+    ctx.fillText(f.text, f.x + 1, f.y + 2);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.restore();
+}
+
+/* Photo backdrop: pre-cropped once to the canvas so every frame is a single drawImage. */
+let bgCanvas = null;
+const BG = new Image();
+BG.onload = () => {
+  const c = document.createElement("canvas");
+  c.width = W * 2; c.height = H * 2;
+  const g = c.getContext("2d");
+  const s = Math.max(c.width / BG.naturalWidth, c.height / BG.naturalHeight);
+  const w = BG.naturalWidth * s, h = BG.naturalHeight * s;
+  g.drawImage(BG, (c.width - w) / 2, (c.height - h) / 2, w, h);
+  bgCanvas = c;
+};
+BG.src = "diwali-gurgaon.jpg";
+
+function sky(t, warm = 0, dim = 0.45) {
+  if (bgCanvas) {
+    ctx.drawImage(bgCanvas, 0, 0, W, H);
+    ctx.fillStyle = `rgba(12,6,28,${dim})`;
+    ctx.fillRect(0, 0, W, H);
+    const v = ctx.createLinearGradient(0, 0, 0, H);
+    v.addColorStop(0, "rgba(10,5,22,.55)");
+    v.addColorStop(0.18, "rgba(10,5,22,0)");
+    v.addColorStop(0.8, "rgba(10,5,22,0)");
+    v.addColorStop(1, "rgba(10,5,22,.6)");
+    ctx.fillStyle = v;
+    ctx.fillRect(0, 0, W, H);
+    return;
+  }
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#0b061d");
+  g.addColorStop(0.65, "#22133f");
+  g.addColorStop(1, `rgb(${lerp(42, 92, warm) | 0},${lerp(23, 40, warm) | 0},${lerp(70, 52, warm) | 0})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  for (const s of STARS) {
+    const a = reduced ? s.a : s.a * (0.55 + 0.45 * Math.sin(t * s.sp + s.ph));
+    ctx.fillStyle = `rgba(255,240,210,${a.toFixed(3)})`;
+    ctx.fillRect(s.x, s.y, s.r, s.r);
+  }
+}
+
+function drawFlame(fx, fy, s, lean, t) {
+  if (s <= 0.02) return;
+  const h = 34 * s, w = 9.5 * s;
+  const tipx = fx + lean * h * 0.7 + Math.sin(t * 9) * 1.4 * s;
+  ctx.save();
+  const glow = ctx.createRadialGradient(fx, fy - h * 0.4, 1, fx, fy - h * 0.4, 70 * s);
+  glow.addColorStop(0, "rgba(255,196,100,.55)");
+  glow.addColorStop(1, "rgba(255,150,60,0)");
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(fx, fy - h * 0.4, 70 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.globalCompositeOperation = "lighter";
+  const g = ctx.createLinearGradient(fx, fy, fx, fy - h);
+  g.addColorStop(0, "#fff7d6");
+  g.addColorStop(0.45, "#ffc23d");
+  g.addColorStop(1, "rgba(255,90,20,.25)");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(tipx, fy - h);
+  ctx.bezierCurveTo(fx + w * 1.3, fy - h * 0.45, fx + w, fy, fx, fy);
+  ctx.bezierCurveTo(fx - w, fy, fx - w * 1.3, fy - h * 0.45, tipx, fy - h);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawDiyaBowl(x, y) {
+  ctx.fillStyle = "#a9431c";
+  ctx.beginPath();
+  ctx.moveTo(x - 34, y - 6);
+  ctx.quadraticCurveTo(x - 30, y + 22, x, y + 22);
+  ctx.quadraticCurveTo(x + 30, y + 22, x + 34, y - 6);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + 24, y - 9); ctx.lineTo(x + 46, y - 15); ctx.lineTo(x + 30, y + 3);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#df7638";
+  ctx.beginPath(); ctx.ellipse(x, y - 6, 34, 8, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#4d1a0a";
+  ctx.beginPath(); ctx.ellipse(x, y - 6, 27, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ffd57e";
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath(); ctx.arc(x + i * 10, y + 9 - Math.abs(i) * 1.6, 2, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawRangoliMotif(cx, cy, r, alpha, t) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  for (let ring = 0; ring < 3; ring++) {
+    const n = 8 + ring * 4, rr = r * (0.35 + ring * 0.3);
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + ring * 0.2;
+      ctx.save();
+      ctx.rotate(a);
+      ctx.fillStyle = PETALS[(i + ring * 2) % PETALS.length];
+      ctx.beginPath(); ctx.ellipse(rr, 0, r * 0.13, r * 0.055, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+  ctx.fillStyle = C.gold;
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.14, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawHint(text) {
+  ctx.save();
+  ctx.font = "700 16px Mukta, system-ui, sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const w = ctx.measureText(text).width + 36, x = W / 2 - w / 2, y = H - 50;
+  ctx.fillStyle = "rgba(10,5,22,.85)";
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, 34, 17); else ctx.rect(x, y, w, 34);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,213,126,.45)"; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = C.gold;
+  ctx.fillText(text, W / 2, y + 17);
+  ctx.restore();
+}
+function tagText(x, y, text, color, size = 15) {
+  ctx.save();
+  ctx.font = `800 ${size}px Mukta, system-ui, sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.lineWidth = 4; ctx.strokeStyle = "rgba(10,5,22,.85)";
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = color; ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/* ---------- stage 1: Diya Keeper ---------- */
+class DiyaStage {
+  constructor(opts = {}) {
+    this.practice = !!opts.practice;
+    this.name = "Diya Keeper"; this.dur = this.practice ? 12 : 45; this.total = this.dur;
+    this.t = 0; this.score = 0; this.gust = 1.4;
+    this.diyas = Array.from({ length: 8 }, (_, i) => {
+      const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      return { x: 300 + Math.cos(a) * 200, y: 410 + Math.sin(a) * 175, state: "lit", warn: 0, warnMax: 1, out: 0, seed: rand(0, 9) };
+    });
+  }
+  get done() { return this.t >= this.dur; }
+  timeLeft() { return this.dur - this.t; }
+  update(dt) {
+    this.t += dt;
+    const p = clamp(this.t / 45, 0, 1);
+    this.gust -= dt;
+    if (this.gust <= 0) {
+      const n = Math.random() < p * 0.55 ? 2 : 1;
+      for (let k = 0; k < n; k++) {
+        const lit = this.diyas.filter((d) => d.state === "lit");
+        if (!lit.length) break;
+        const d = pick(lit);
+        d.state = "flicker"; d.warnMax = lerp(1.1, 0.6, p); d.warn = d.warnMax;
+      }
+      this.gust = lerp(1.35, 0.5, p) * rand(0.75, 1.25);
+    }
+    let lit = 0;
+    for (const d of this.diyas) {
+      if (d.state === "flicker") {
+        d.warn -= dt;
+        if (d.warn <= 0) { d.state = "out"; d.out = 0; tone(140, 0.2, "triangle", 0.05, 0.5); }
+      } else if (d.state === "out") d.out += dt;
+      if (d.state !== "out") lit++;
+    }
+    this.lit = lit;
+    this.score += lit * dt * 1.2;
+  }
+  tap(x, y) {
+    let best = null, bd = 60;
+    for (const d of this.diyas) {
+      const dist = Math.hypot(x - d.x, y - (d.y - 10));
+      if (dist < bd) { bd = dist; best = d; }
+    }
+    if (!best) return;
+    if (best.state === "flicker") {
+      best.state = "lit"; this.score += 8;
+      floatText(best.x, best.y - 50, "Saved +8", C.leaf);
+      tone(660, 0.1, "sine", 0.06); tone(990, 0.12, "sine", 0.04);
+    } else if (best.state === "out") {
+      const quick = best.out < 0.9, pts = quick ? 4 : 2;
+      best.state = "lit"; this.score += pts;
+      floatText(best.x, best.y - 50, quick ? `Quick +${pts}` : `Relit +${pts}`, C.gold);
+      burst(best.x + 36, best.y - 20, C.marigold, 14, 0.4);
+      tone(520, 0.12, "triangle", 0.06);
+    }
+  }
+  draw(t) {
+    const warm = (this.lit ?? 8) / 8;
+    sky(t, warm, 0.68);
+    // courtyard floor
+    const g = ctx.createRadialGradient(300, 420, 30, 300, 420, 300);
+    g.addColorStop(0, `rgba(255,170,80,${0.22 * warm})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = "rgba(10,5,22,.6)";
+    ctx.beginPath(); ctx.ellipse(300, 420, 285, 250, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(300, 420, 285, 250, 0, 0, Math.PI * 2); ctx.fill();
+    drawRangoliMotif(300, 415, 130, 0.35 + 0.35 * warm, t);
+
+    for (const d of this.diyas) {
+      const fx = d.x + 38, fy = d.y - 15;
+      if (d.state === "out") {
+        ctx.strokeStyle = `rgba(247,165,49,${0.35 + 0.25 * Math.sin(t * 6)})`;
+        ctx.lineWidth = 2; ctx.setLineDash([5, 6]);
+        ctx.beginPath(); ctx.arc(d.x, d.y - 8, 46, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      drawDiyaBowl(d.x, d.y);
+      if (d.state === "lit") {
+        drawFlame(fx, fy, 1 + Math.sin(t * 7 + d.seed) * 0.05, 0.05 * Math.sin(t * 3 + d.seed), t + d.seed);
+      } else if (d.state === "flicker") {
+        const k = d.warn / d.warnMax;
+        const s = (0.35 + 0.55 * k) * (0.8 + 0.2 * Math.sin(t * 48 + d.seed));
+        drawFlame(fx, fy, s, -0.7, t * 2 + d.seed);
+        ctx.strokeStyle = "rgba(220,230,255,.45)"; ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          const off = ((t * 220 + i * 40 + d.seed * 30) % 90);
+          const yy = fy - 30 + i * 12;
+          ctx.beginPath();
+          ctx.moveTo(fx + 70 - off, yy);
+          ctx.quadraticCurveTo(fx + 50 - off, yy - 6, fx + 30 - off, yy);
+          ctx.stroke();
+        }
+      } else {
+        ctx.fillStyle = "rgba(255,110,40,.8)";
+        ctx.beginPath(); ctx.arc(fx, fy + 2, 2.2, 0, Math.PI * 2); ctx.fill();
+        for (let i = 0; i < 3; i++) {
+          const ph = (d.out * 0.7 + i / 3) % 1;
+          ctx.fillStyle = `rgba(200,190,215,${(0.28 * (1 - ph)).toFixed(3)})`;
+          ctx.beginPath();
+          ctx.arc(fx + Math.sin(ph * 6 + i) * 6, fy - ph * 55, 4 + ph * 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+    for (const d of this.diyas) {
+      if (d.state === "flicker") tagText(d.x, d.y - 66, "TAP!", C.gold, 19);
+      else if (d.state === "out") tagText(d.x, d.y + 42, "Tap to relight", C.marigold, 14);
+    }
+    drawHint("Tap a flickering diya to save it. Tap a dark one to relight it.");
+  }
+}
+
+/* ---------- stage 2: Firework Frenzy ---------- */
+const GRAV = 520;
+const SKYLINE = (() => {
+  const pts = []; let x = 0;
+  while (x < W) {
+    const w = rand(40, 90), h = rand(40, 110);
+    const dome = Math.random() < 0.3;
+    pts.push({ x, w, h, dome, win: Array.from({ length: 3 }, () => ({ dx: rand(8, w - 12), dy: rand(14, h - 10) })) });
+    x += w;
+  }
+  return pts;
+})();
+class FireStage {
+  constructor(opts = {}) {
+    this.practice = !!opts.practice;
+    this.name = "Firework Frenzy"; this.dur = this.practice ? 12 : 40; this.total = this.dur;
+    this.t = 0; this.score = 0;
+    this.rockets = []; this.spawn = 0.6; this.combo = 0;
+  }
+  get done() { return this.t >= this.dur; }
+  timeLeft() { return this.dur - this.t; }
+  get mult() { return 1 + Math.min(1.5, Math.floor(this.combo / 4) * 0.25); }
+  launch() {
+    const apex = rand(130, 360), x = rand(70, 530);
+    const vy = -Math.sqrt(2 * GRAV * (H + 10 - apex));
+    this.rockets.push({ x, y: H + 10, vx: rand(-25, 25), vy, age: 0, apexT: -vy / GRAV, color: pick(FIRE_COLORS), trail: [] });
+    tone(300, 0.25, "sine", 0.025, 2.2);
+  }
+  update(dt) {
+    this.t += dt;
+    const p = clamp(this.t / 40, 0, 1);
+    this.spawn -= dt;
+    if (this.spawn <= 0 && this.t < this.dur - 1.2) {
+      this.launch();
+      if (Math.random() < p * 0.45) this.launch();
+      this.spawn = lerp(1.05, 0.5, p) * rand(0.8, 1.2);
+    }
+    for (const r of this.rockets) {
+      r.age += dt;
+      r.vy += GRAV * dt;
+      r.x += r.vx * dt; r.y += r.vy * dt;
+      r.trail.push({ x: r.x, y: r.y });
+      if (r.trail.length > 10) r.trail.shift();
+      if (r.age > r.apexT + 0.5) {
+        r.dead = true;
+        this.combo = 0;
+        burst(r.x, r.y, "#6a5a7a", 10, 0.25);
+        floatText(r.x, r.y - 16, "Missed", C.muted, 16);
+      }
+    }
+    this.rockets = this.rockets.filter((r) => !r.dead);
+  }
+  tap(x, y) {
+    let best = null, bd = 58;
+    for (const r of this.rockets) {
+      const d = Math.hypot(x - r.x, y - r.y);
+      if (d < bd) { bd = d; best = r; }
+    }
+    if (!best) {
+      if (this.combo > 0) floatText(x, y, "Combo lost", C.muted, 15);
+      this.combo = 0;
+      return;
+    }
+    best.dead = true;
+    const v = Math.abs(best.vy);
+    let label, base, power;
+    if (v < 70) { label = "Perfect"; base = 25; power = 1.3; this.combo++; }
+    else if (v < 180) { label = "Good"; base = 12; power = 0.9; this.combo++; }
+    else { label = "Early"; base = 3; power = 0.5; this.combo = 0; }
+    const pts = Math.round(base * this.mult);
+    this.score += pts;
+    burst(best.x, best.y, best.color, label === "Perfect" ? 80 : 45, power);
+    if (label === "Perfect") burst(best.x, best.y, pick(FIRE_COLORS), 30, 0.6);
+    floatText(best.x, best.y - 20, `${label} +${pts}`, label === "Perfect" ? C.gold : label === "Good" ? C.text : C.muted, label === "Perfect" ? 24 : 19);
+    boom(label === "Perfect" ? 0.16 : 0.09);
+    this.rockets = this.rockets.filter((r) => !r.dead);
+  }
+  draw(t) {
+    sky(t, 0.15, 0.6);
+    for (const r of this.rockets) {
+      ctx.strokeStyle = "rgba(255,220,160,.5)"; ctx.lineWidth = 2;
+      ctx.beginPath();
+      r.trail.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)));
+      ctx.stroke();
+      const v = Math.abs(r.vy);
+      const rad = 9 + v * 0.085;
+      ctx.strokeStyle = v < 70 ? C.gold : "rgba(251,240,220,.75)";
+      ctx.lineWidth = v < 70 ? 4 : 2.5;
+      ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = r.color;
+      ctx.beginPath(); ctx.arc(r.x, r.y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(r.x, r.y, 2, 0, Math.PI * 2); ctx.fill();
+    }
+    // rooftops, only when the city photo isn't available
+    if (!bgCanvas) {
+      ctx.fillStyle = "#0a0516";
+      for (const b of SKYLINE) {
+        ctx.fillRect(b.x, H - b.h, b.w + 1, b.h);
+        if (b.dome) { ctx.beginPath(); ctx.arc(b.x + b.w / 2, H - b.h, b.w * 0.32, Math.PI, 0); ctx.fill(); }
+      }
+      ctx.fillStyle = "rgba(255,200,110,.8)";
+      for (const b of SKYLINE) for (const w of b.win) ctx.fillRect(b.x + w.dx, H - b.h + w.dy, 4, 4);
+    }
+    if (this.combo >= 4) {
+      ctx.font = "800 18px Mukta, system-ui, sans-serif"; ctx.textAlign = "left";
+      ctx.fillStyle = C.gold;
+      ctx.fillText(`Combo ${this.combo} · ×${this.mult.toFixed(2).replace(/\.?0+$/, "")}`, 20, 92);
+    }
+    drawHint("Tap each rocket when its ring shrinks and turns gold.");
+  }
+}
+
+/* ---------- stage 3: Rangoli Recall ---------- */
+class RangoliStage {
+  constructor(opts = {}) {
+    this.practice = !!opts.practice;
+    this.name = "Rangoli Recall"; this.score = 0; this.len = 3;
+    this.inputLeft = this.practice ? 12 : 45; this.total = this.inputLeft;
+    this.mistakes = 0; this.ended = false; this.endT = 0;
+    this.cx = 300; this.cy = 400;
+    this.petals = PETALS.map((c, i) => {
+      const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      return { a, x: this.cx + Math.cos(a) * 128, y: this.cy + Math.sin(a) * 128, color: c, glow: 0 };
+    });
+    this.seq = this.newSeq(this.len);
+    this.phase = "pause"; this.pt = 0.7; this.after = "show";
+    this.label = "Watch";
+  }
+  get done() { return this.inputLeft <= 0 || (this.ended && this.endT <= 0); }
+  timeLeft() { return Math.max(0, this.inputLeft); }
+  newSeq(n) {
+    const s = [];
+    while (s.length < n) { const v = (Math.random() * 8) | 0; if (v !== s[s.length - 1]) s.push(v); }
+    return s;
+  }
+  startShow() { this.phase = "show"; this.si = 0; this.st = 0; this.beeped = -1; this.label = "Watch"; }
+  update(dt) {
+    for (const p of this.petals) p.glow = Math.max(0, p.glow - dt * 3.2);
+    if (this.ended) { this.endT -= dt; return; }
+    if (this.phase === "pause") {
+      this.pt -= dt;
+      if (this.pt <= 0) this.startShow();
+    } else if (this.phase === "show") {
+      const on = Math.max(0.3, 0.55 - (this.len - 3) * 0.025), gap = 0.14;
+      this.st += dt;
+      if (this.st < on) {
+        const i = this.seq[this.si];
+        this.petals[i].glow = 1;
+        if (this.beeped !== this.si) { this.beeped = this.si; tone(330 + i * 55, 0.18, "sine", 0.06); }
+      }
+      if (this.st >= on + gap) {
+        this.si++; this.st = 0;
+        if (this.si >= this.seq.length) { this.phase = "input"; this.pos = 0; this.roundT = 0; this.label = "Your turn"; }
+      }
+    } else if (this.phase === "input") {
+      this.inputLeft -= dt; this.roundT += dt;
+    }
+  }
+  tap(x, y) {
+    if (this.phase !== "input" || this.ended) return;
+    let best = -1, bd = 62;
+    this.petals.forEach((p, i) => { const d = Math.hypot(x - p.x, y - p.y); if (d < bd) { bd = d; best = i; } });
+    if (best < 0) return;
+    const p = this.petals[best];
+    if (best === this.seq[this.pos]) {
+      p.glow = 1; tone(330 + best * 55, 0.14, "sine", 0.06);
+      this.pos++;
+      if (this.pos >= this.seq.length) {
+        const bonus = Math.max(0, Math.round((this.len * 0.9 - this.roundT) * 15));
+        const pts = this.len * 30 + bonus;
+        this.score += pts;
+        floatText(this.cx, this.cy - 210, `${this.len} petals +${pts}`, C.gold, 24);
+        burst(this.cx, this.cy, pick(PETALS), 60, 0.9);
+        tone(784, 0.16, "triangle", 0.05); tone(1046, 0.22, "triangle", 0.04);
+        this.len++;
+        this.seq = this.newSeq(this.len);
+        this.phase = "pause"; this.pt = 0.8; this.label = "Nice";
+      }
+    } else {
+      this.mistakes++;
+      p.glow = 1; p.wrong = 0.5;
+      tone(150, 0.3, "sawtooth", 0.04, 0.6);
+      if (this.mistakes >= 3) {
+        this.ended = true; this.endT = 0.9; this.label = "Out of lives";
+      } else {
+        floatText(this.cx, this.cy - 210, "Wrong petal. Watch again", C.rani, 20);
+        this.phase = "pause"; this.pt = 0.9; this.label = "Again";
+      }
+    }
+  }
+  draw(t) {
+    sky(t, 0.3, 0.68);
+    ctx.fillStyle = "rgba(10,5,22,.6)";
+    ctx.beginPath(); ctx.arc(this.cx, this.cy, 232, 0, Math.PI * 2); ctx.fill();
+    // outer dot ring
+    for (let i = 0; i < 48; i++) {
+      const a = (i / 48) * Math.PI * 2;
+      ctx.fillStyle = i % 2 ? "rgba(255,213,126,.5)" : "rgba(232,69,127,.5)";
+      ctx.beginPath(); ctx.arc(this.cx + Math.cos(a) * 215, this.cy + Math.sin(a) * 215, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    for (const [i, p] of this.petals.entries()) {
+      const wrong = p.wrong > 0;
+      if (wrong) p.wrong -= 1 / 60;
+      const g = p.glow;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      if (g > 0) {
+        ctx.shadowColor = wrong ? C.rani : p.color;
+        ctx.shadowBlur = 40 * g;
+      }
+      ctx.globalAlpha = 0.32 + 0.68 * g;
+      ctx.fillStyle = wrong && g > 0 ? C.rani : p.color;
+      const s = 1 + 0.1 * g;
+      ctx.beginPath(); ctx.ellipse(0, 0, 66 * s, 34 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.5 + 0.5 * g;
+      ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, 0, 40 * s, 15 * s, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.8)";
+      ctx.beginPath(); ctx.arc(-46 * s, 0, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    ctx.fillStyle = "#2e1b52";
+    ctx.beginPath(); ctx.arc(this.cx, this.cy, 62, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = C.gold; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(this.cx, this.cy, 62, 0, Math.PI * 2); ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.fillStyle = C.text;
+    ctx.font = "800 19px Mukta, system-ui, sans-serif";
+    ctx.fillText(this.label, this.cx, this.cy - 2);
+    ctx.font = "600 14px Mukta, system-ui, sans-serif";
+    ctx.fillStyle = C.muted;
+    const prog = this.phase === "input" ? `${this.pos} / ${this.seq.length}` : `${this.seq.length} petals`;
+    ctx.fillText(prog, this.cx, this.cy + 20);
+    // lives
+    ctx.textAlign = "left";
+    ctx.font = "700 16px Mukta, system-ui, sans-serif";
+    ctx.fillStyle = C.muted;
+    ctx.fillText("Lives", 20, 92);
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < 3 - this.mistakes ? C.marigold : "rgba(255,255,255,.15)";
+      ctx.beginPath(); ctx.arc(72 + i * 18, 87, 6, 0, Math.PI * 2); ctx.fill();
+    }
+    drawHint(this.phase === "input" ? "Your turn: tap the petals in the same order." : "Watch which petals light up, and in what order.");
+  }
+}
+
+const STAGES = [
+  { key: "diya", name: "Diya Keeper", skill: "Reflexes", cls: DiyaStage, icon: "🪔", length: "45 seconds",
+    steps: [
+      "Eight diyas burn around the rangoli. Every lit diya earns points every second.",
+      "When wind hits a diya it flickers and shows <b>TAP!</b> Tap it before it goes out to save it (+8).",
+      "If a diya goes dark, tap it to relight it. Quick relights earn more.",
+    ] },
+  { key: "fire", name: "Firework Frenzy", skill: "Timing", cls: FireStage, icon: "🎆", length: "40 seconds",
+    steps: [
+      "Rockets fly up from the bottom, each inside a white ring.",
+      "The ring shrinks as the rocket slows down. Tap the rocket when the ring turns <b>gold</b> for a Perfect (+25).",
+      "Perfect and Good taps build a combo multiplier. Missing a rocket or tapping empty sky resets it.",
+    ] },
+  { key: "rangoli", name: "Rangoli Recall", skill: "Memory", cls: RangoliStage, icon: "🌸", length: "45 seconds of tapping",
+    steps: [
+      "Watch the petals light up one at a time.",
+      "When the centre says <b>Your turn</b>, tap the same petals in the same order.",
+      "Each round adds one petal, and finishing fast earns a bonus. Three wrong taps end the game.",
+    ] },
+];
+
+/* ---------- menu ambience ---------- */
+const menuScene = {
+  t: 0, fw: 0.4,
+  update(dt) {
+    this.fw -= dt;
+    if (this.fw <= 0) { this.fw = rand(0.9, 1.8); burst(rand(90, 510), rand(110, 330), pick(FIRE_COLORS), 45, 0.8); }
+  },
+  draw(t) {
+    sky(t, 0.6, 0.1);
+    for (let i = 0; i < 5; i++) {
+      const x = 80 + i * 110, y = 650;
+      drawDiyaBowl(x, y);
+      drawFlame(x + 38, y - 15, 1 + Math.sin(t * 6 + i) * 0.06, 0, t + i);
+    }
+  },
+  tap() {},
+};
+
+/* ---------- loop ---------- */
+let scene = menuScene, last = performance.now(), clock = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now; clock += dt;
+  const sc = scene;
+  if (sc.countdown > 0) {
+    const before = Math.ceil(sc.countdown);
+    sc.countdown -= dt;
+    const after = Math.ceil(sc.countdown);
+    if (after !== before) tone(after > 0 ? 520 : 880, 0.12, "triangle", 0.05);
+  } else if (sc !== menuScene && !sc.finished) {
+    sc.update(dt);
+    if (sc.done) {
+      sc.finished = true;
+      tone(660, 0.15, "triangle", 0.05); tone(880, 0.25, "triangle", 0.05);
+      setTimeout(() => sc.onDone(Math.round(sc.score)), 800);
+    }
+  } else if (sc === menuScene) sc.update(dt);
+  updateFx(dt);
+  sc.draw(clock);
+  drawFx();
+  if (sc !== menuScene) drawHud(sc);
+  if (sc.countdown > 0) {
+    const n = Math.ceil(sc.countdown), f = sc.countdown % 1;
+    ctx.save();
+    ctx.fillStyle = "rgba(14,7,30,.45)"; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.globalAlpha = clamp(f * 1.6, 0, 1);
+    ctx.font = `${120 + (1 - f) * 30}px "Yatra One", Georgia, serif`;
+    ctx.fillStyle = C.gold;
+    ctx.fillText(String(n), W / 2, H / 2);
+    ctx.restore();
+  }
+  requestAnimationFrame(frame);
+}
+function drawHud(sc) {
+  ctx.save();
+  ctx.fillStyle = "rgba(10,5,22,.6)";
+  ctx.fillRect(0, 0, W, 62);
+  const total = sc.total;
+  ctx.fillStyle = "rgba(255,255,255,.1)"; ctx.fillRect(0, 58, W, 4);
+  ctx.fillStyle = C.marigold; ctx.fillRect(0, 58, W * clamp(sc.timeLeft() / total, 0, 1), 4);
+  ctx.textBaseline = "middle";
+  ctx.font = "700 16px Mukta, system-ui, sans-serif";
+  ctx.fillStyle = sc.practice ? C.leaf : C.muted; ctx.textAlign = "left";
+  ctx.fillText(sc.practice ? "PRACTICE" : `Game ${sc.idx} of 3`, 20, 22);
+  ctx.fillStyle = C.text; ctx.font = "800 19px Mukta, system-ui, sans-serif";
+  ctx.fillText(sc.name, 20, 42);
+  ctx.textAlign = "center";
+  ctx.font = "800 30px Mukta, system-ui, sans-serif";
+  const tl = Math.ceil(sc.timeLeft());
+  ctx.fillStyle = tl <= 5 ? C.rani : C.text;
+  ctx.fillText(String(tl), W / 2, 31);
+  ctx.textAlign = "right";
+  ctx.font = "800 22px Mukta, system-ui, sans-serif";
+  ctx.fillStyle = C.gold;
+  ctx.fillText(fmt(sc.score), W - 20, 26);
+  ctx.font = "600 13px Mukta, system-ui, sans-serif";
+  ctx.fillStyle = C.muted;
+  ctx.fillText(sc.practice ? "doesn't count" : `run total ${fmt(runSoFar + sc.score)}`, W - 20, 46);
+  ctx.restore();
+}
+requestAnimationFrame(frame);
+
+cv.addEventListener("pointerdown", (e) => {
+  const r = cv.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width) * W, y = ((e.clientY - r.top) / r.height) * H;
+  if (scene === menuScene || scene.countdown > 0 || scene.finished) return;
+  e.preventDefault();
+  scene.tap(x, y);
+});
+
+function runStage(sc, idx) {
+  particles = []; floats = [];
+  sc.idx = idx; sc.countdown = 3;
+  return new Promise((res) => { sc.onDone = res; scene = sc; });
+}
+
+/* ---------- overlay screens ---------- */
+const ov = $("#ov");
+// Live leaderboard updates only redraw the start screen while it is showing, never mid-run or over results.
+let onHome = false;
+function show(html, solid = true) {
+  ov.innerHTML = html; ov.hidden = false; ov.scrollTop = 0;
+  ov.classList.toggle("solid", solid);
+  onHome = false;
+}
+function hide() { ov.hidden = true; ov.innerHTML = ""; onHome = false; }
+function waitClick(id) { return waitChoice([id]); }
+function waitChoice(ids) {
+  return new Promise((res) => {
+    ids.forEach((id, i) => {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.addEventListener("click", () => res(id), { once: true });
+      if (i === 0) b.focus({ preventScroll: true });
+    });
+  });
+}
+
+/* ---------- data ---------- */
+// Scores live in Supabase. The browser only calls four database functions (see supabase/schema.sql);
+// the server adds up totals and ranks players. Each browser gets a private player id kept in localStorage.
+const CFG = window.TRIATHLON_CONFIG || {};
+const SB_URL = String(CFG.supabaseUrl || "").replace(/\/+$/, "");
+const SB_KEY = String(CFG.supabaseAnonKey || "");
+const configured = /^https?:\/\//.test(SB_URL) && SB_KEY.length > 20 && !/YOUR_/.test(SB_URL + SB_KEY);
+
+let mode = "loading"; // loading | online | offline
+let players = [], boardLoaded = false, boardError = false, runSoFar = 0, running = false, runsThisVisit = 0;
+let me = { bestTotal: 0, best: null, bestAt: "" };
+let myPost = null; // { rank, name, total, diya, fire, rangoli, players }
+const LOCAL_KEY = "diwali-triathlon-best";
+const DEVICE_KEY = "diwali-triathlon-player";
+
+function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0; return (c === "x" ? r : (r & 3) | 8).toString(16);
+  });
+}
+let deviceId = load(DEVICE_KEY);
+if (!deviceId || !/^[0-9a-f-]{36}$/i.test(deviceId)) { deviceId = uuid(); store(DEVICE_KEY, deviceId); }
+
+function readLocalBest() {
+  try { const v = JSON.parse(load(LOCAL_KEY) || "null"); if (v && num(v.bestTotal) > 0) return v; } catch (e) {}
+  return null;
+}
+function adoptBest(v) {
+  if (v && num(v.bestTotal) > num(me.bestTotal)) me = { bestTotal: num(v.bestTotal), best: v.best || null, bestAt: String(v.bestAt || "") };
+}
+
+async function rpc(fn, args) {
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args || {}),
+  });
+  const text = await res.text();
+  let body = null;
+  try { body = text ? JSON.parse(text) : null; } catch (e) { body = null; }
+  if (!res.ok) {
+    const err = new Error((body && body.message) || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
+  return body;
+}
+
+function canPost() { return mode === "online"; }
+function unposted() { return num(me.bestTotal) > num(myPost?.total); }
+function myRank() { return num(myPost?.rank); }
+
+function renderPill() {
+  $("#lamps").textContent = "🪔";
+  $("#attemptText").textContent = num(me.bestTotal) > 0 ? `Your best ${fmt(me.bestTotal)}` : "Play as often as you like";
+}
+
+function avatar(name) {
+  const s = document.createElement("span");
+  s.className = "avatar";
+  s.style.cssText = "display:grid;place-items:center;font-weight:800;color:#2a1300;background:var(--marigold)";
+  s.textContent = (cleanName(name)[0] || "?").toUpperCase();
+  return s;
+}
+
+function renderBoard() {
+  const rows = $("#rows");
+  const mine = $("#mine");
+  if (mode === "offline") {
+    rows.innerHTML = '<li class="empty">The leaderboard isn\'t connected yet. You can still play.</li>';
+    mine.hidden = true; return;
+  }
+  if (!boardLoaded) {
+    if (boardError) rows.innerHTML = '<li class="empty">Can\'t reach the leaderboard right now. It will refresh by itself.</li>';
+    return;
+  }
+  rows.innerHTML = "";
+  if (!players.length) rows.innerHTML = '<li class="empty">No scores posted yet. Finish a run and post it to claim the top spot.</li>';
+  players.slice(0, 5).forEach((p) => {
+    const isMe = myPost && num(p.rank) === myRank();
+    const li = document.createElement("li");
+    li.className = "row" + (isMe ? " me" : "");
+    const rk = document.createElement("span"); rk.className = "rank"; rk.textContent = String(num(p.rank));
+    const who = document.createElement("div"); who.className = "who";
+    const nm = document.createElement("b");
+    nm.textContent = (cleanName(p.name) || "Someone") + (isMe ? " (you)" : "");
+    const br = document.createElement("small");
+    br.textContent = `Diya ${fmt(num(p.diya))} · Fire ${fmt(num(p.fire))} · Rangoli ${fmt(num(p.rangoli))}`;
+    who.append(nm, br);
+    const pts = document.createElement("span"); pts.className = "pts"; pts.textContent = fmt(num(p.total));
+    li.append(rk, avatar(p.name), who, pts);
+    rows.append(li);
+  });
+
+  mine.hidden = false;
+  if (myPost) {
+    mine.innerHTML = `You're <b>#${myRank()}</b> of ${fmt(num(myPost.players))} with <b>${fmt(num(myPost.total))}</b>.` +
+      (unposted() ? ` Your new best of <b>${fmt(me.bestTotal)}</b> isn't posted yet.` : "");
+  } else if (num(me.bestTotal) > 0) {
+    mine.innerHTML = `Your best is <b>${fmt(me.bestTotal)}</b>. Post it whenever you're ready.`;
+  } else mine.hidden = true;
+}
+
+let refreshing = false;
+async function refreshBoard() {
+  if (!configured || refreshing) return;
+  refreshing = true;
+  try {
+    const [top, mineRows] = await Promise.all([
+      rpc("top_scores", { p_limit: 5 }),
+      rpc("my_standing", { p_device: deviceId }),
+    ]);
+    players = Array.isArray(top) ? top : [];
+    myPost = Array.isArray(mineRows) && mineRows[0] ? mineRows[0] : null;
+    boardLoaded = true; boardError = false;
+  } catch (e) {
+    boardError = true;
+  }
+  refreshing = false;
+  renderPill(); renderBoard();
+  // Redraw the start screen with fresh data, unless someone is typing a name on it.
+  const f = document.getElementById("nameForm");
+  if (onHome && (!f || (!f.dataset.dirty && !f.contains(document.activeElement)))) renderHome();
+}
+
+async function boot() {
+  adoptBest(readLocalBest());
+  mode = configured ? "online" : "offline";
+  renderPill(); renderBoard(); if (onHome) renderHome();
+  if (!configured) return;
+  await refreshBoard();
+  setInterval(() => { if (!document.hidden && !running) refreshBoard(); }, 20000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && !running) refreshBoard(); });
+}
+
+async function recordRun(scores, total) {
+  if (total <= num(me.bestTotal)) return false;
+  me = { bestTotal: total, best: { ...scores }, bestAt: new Date().toISOString() };
+  store(LOCAL_KEY, JSON.stringify(me));
+  return true;
+}
+
+// Posts your unposted best, or just renames you if the board already has your best.
+async function postBest(name) {
+  if (unposted() && me.best) {
+    await rpc("post_score", {
+      p_device: deviceId, p_name: name,
+      p_diya: num(me.best.diya), p_fire: num(me.best.fire), p_rangoli: num(me.best.rangoli),
+    });
+  } else {
+    await rpc("rename_player", { p_device: deviceId, p_name: name });
+  }
+  await refreshBoard();
+}
+
+function nameFormHtml(label, button = "Post score") {
+  return `<form class="name-form" id="nameForm" novalidate>
+    <label for="nameInput">${label}</label>
+    <div class="name-row">
+      <input id="nameInput" name="nameInput" maxlength="24" autocomplete="nickname" placeholder="Your name, e.g. Priya from Sales">
+      <button class="btn" type="submit" id="postBtn" data-label="${button}">${button}</button>
+    </div>
+    <p class="note" id="nameMsg">Everyone sees this name on the leaderboard.</p>
+  </form>`;
+}
+function bindNameForm() {
+  const form = document.getElementById("nameForm");
+  if (!form) return;
+  const input = document.getElementById("nameInput");
+  const btn = document.getElementById("postBtn");
+  const msg = document.getElementById("nameMsg");
+  input.value = cleanName(myPost?.name) || cleanName(load("diwali-triathlon-name"));
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = cleanName(input.value);
+    if (!name) { msg.textContent = "Type the name you want on the leaderboard."; input.focus(); return; }
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      store("diwali-triathlon-name", name);
+      await postBest(name);
+      msg.textContent = myPost
+        ? `Saved. You're on the leaderboard as ${name} with ${fmt(num(myPost.total))}. That's #${myRank()}.`
+        : `Saved as ${name}.`;
+      btn.textContent = "Saved";
+      btn.disabled = false;
+      renderPill();
+    } catch (err) {
+      msg.textContent = err && err.status === 400 && err.message ? err.message : "Couldn't save. Check your connection and try again.";
+      btn.disabled = false; btn.textContent = btn.dataset.label || "Post score";
+    }
+  });
+  input.addEventListener("input", () => { form.dataset.dirty = "1"; btn.textContent = btn.dataset.label || "Post score"; });
+}
+
+/* ---------- screens ---------- */
+const chipsHtml = STAGES.map((s) => `<div class="chip"><b>${s.name}</b><span>${s.skill}</span></div>`).join("");
+
+function renderHome(msg = "") {
+  if (running) return;
+  scene = menuScene;
+  const best = num(me.bestTotal);
+  let status = "";
+  if (mode === "online" && !boardLoaded && !boardError) status = `<p class="note">Loading the leaderboard…</p>`;
+  if (mode === "offline") status = `<p class="note">The leaderboard isn't connected yet, so scores can't be posted. You can still play.</p>`;
+  if (best > 0) status += `<p>Your best so far: <b style="color:var(--text)">${fmt(best)}</b>${myPost ? ` · #${myRank()} on the board` : ""}</p>`;
+  const showPost = canPost() && boardLoaded && best > 0 && unposted();
+  show(`<div class="card">
+    <h2>Light up the leaderboard</h2>
+    ${msg ? `<p class="note" style="color:var(--rani)">${msg}</p>` : ""}
+    <p class="lede">Three short games back to back: reflexes, timing, memory. Play as often as you like and post your best score whenever you're ready.</p>
+    <div class="chips">${chipsHtml}</div>
+    ${status}
+    <div class="btn-row">
+      <button class="btn" id="go" type="button">${runsThisVisit || best ? "Play again" : "Play the triathlon"}</button>
+      ${best > 0 ? `<button class="btn ghost" id="challenge" type="button">Copy a challenge</button>` : ""}
+    </div>
+    ${showPost ? nameFormHtml(`Post your best (${fmt(best)}) to the leaderboard`) : ""}
+    ${canPost() && myPost && !showPost ? `<div id="renameArea"><button class="link-btn" id="renameOpen" type="button">Change my name on the leaderboard</button></div>` : ""}
+    <div id="copyArea"></div>
+  </div>`, false);
+  onHome = true;
+  document.getElementById("go").addEventListener("click", startRun);
+  const ch = document.getElementById("challenge");
+  if (ch) ch.addEventListener("click", () => copyChallenge(ch));
+  bindNameForm();
+  const ro = document.getElementById("renameOpen");
+  if (ro) ro.addEventListener("click", () => {
+    document.getElementById("renameArea").innerHTML = nameFormHtml("Your name on the leaderboard", "Save name");
+    bindNameForm();
+    const inp = document.getElementById("nameInput");
+    inp.focus(); inp.select();
+  });
+}
+
+function challengeText() {
+  const best = num(myPost?.total) || num(me.bestTotal);
+  const r = myRank();
+  const link = CFG.gameUrl || location.origin + location.pathname;
+  return `I scored ${fmt(best)} in the VDB Diwali Triathlon 🪔${r ? ` and I'm #${r} on the board` : ""}. Three Diwali games back to back. Think you can beat me? ${link}`;
+}
+function copyChallenge(btn) {
+  const text = challengeText();
+  const done = () => { btn.textContent = "Copied. Paste it in Slack"; };
+  const fallback = () => {
+    const area = document.getElementById("copyArea");
+    if (!area) return;
+    area.innerHTML = `<textarea class="copybox" id="copyText" readonly aria-label="Challenge message"></textarea><p class="note">Select the text and copy it.</p>`;
+    const ta = document.getElementById("copyText");
+    ta.value = text; ta.focus(); ta.select();
+  };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+}
+
+function breakdownHtml(scores) {
+  return `<div class="breakdown">
+    <div><span>Diya</span><b>${fmt(num(scores.diya))}</b></div>
+    <div><span>Fire</span><b>${fmt(num(scores.fire))}</b></div>
+    <div><span>Rangoli</span><b>${fmt(num(scores.rangoli))}</b></div></div>`;
+}
+function celebrate() {
+  burst(300, 260, C.gold, 90, 1.2); burst(180, 320, C.rani, 60, 1); burst(420, 320, C.leaf, 60, 1);
+  boom(0.18);
+}
+
+// One game: how-to card, optional 12-second practice (repeatable), then the real round.
+async function playStage(S, i) {
+  const first = runsThisVisit === 0;
+  show(`<div class="card">
+    <span class="eyebrow">Game ${i + 1} of 3 · ${S.skill}</span>
+    <h2>${S.icon} ${S.name}</h2>
+    <p class="lede">How to play</p>
+    <ol class="steps">${S.steps.map((s) => `<li><span>${s}</span></li>`).join("")}</ol>
+    ${first
+      ? `<p class="note">Try it first with a 12-second practice. Practice doesn't count.</p>
+         <div class="btn-row"><button class="btn" id="practiceGo" type="button">Try a 12-second practice</button></div>
+         <button class="link-btn" id="realGo" type="button">Skip practice and start for real</button>`
+      : `<div class="btn-row"><button class="btn" id="realGo" type="button">Start ${S.name}</button></div>
+         <button class="link-btn" id="practiceGo" type="button">Practise for 12 seconds first</button>`}
+  </div>`);
+  let choice = await waitChoice(first ? ["practiceGo", "realGo"] : ["realGo", "practiceGo"]);
+  while (choice === "practiceGo") {
+    hide();
+    const p = await runStage(new S.cls({ practice: true }), i + 1);
+    show(`<div class="card">
+      <span class="eyebrow">Practice over</span>
+      <h2>Nice try!</h2>
+      <p class="lede">You scored <b>${fmt(p)}</b> in practice. That one didn't count.</p>
+      <p>The real ${S.name} lasts ${S.length} and counts toward your total. Ready?</p>
+      <div class="btn-row">
+        <button class="btn" id="realGo" type="button">Start ${S.name} for real</button>
+        <button class="btn ghost" id="practiceGo" type="button">Practice again</button>
+      </div>
+    </div>`);
+    choice = await waitChoice(["realGo", "practiceGo"]);
+  }
+  hide();
+  return runStage(new S.cls(), i + 1);
+}
+
+async function startRun() {
+  if (running) return;
+  initAudio();
+  running = true;
+  runSoFar = 0;
+  const scores = {};
+  for (let i = 0; i < STAGES.length; i++) {
+    const S = STAGES[i], next = STAGES[i + 1];
+    const v = await playStage(S, i);
+    scores[S.key] = v;
+    runSoFar += v;
+    scene = menuScene;
+    celebrate();
+    show(`<div class="card">
+      <span class="eyebrow">Game ${i + 1} of 3 complete</span>
+      <h2>🎉 Well played!</h2>
+      <p class="lede">${S.name} is over. Your score:</p>
+      <div class="big-score">${fmt(v)}</div>
+      ${next
+        ? `<p class="note">Run total so far: <b style="color:var(--text)">${fmt(runSoFar)}</b></p>
+           <p>Next up: <b style="color:var(--text)">${next.icon} ${next.name}</b>.</p>`
+        : `<p>That's all three games done.</p>`}
+      <div class="btn-row"><button class="btn" id="nextGo" type="button">${next ? `Continue to ${next.name}` : "See your total"}</button></div>
+    </div>`);
+    await waitClick("nextGo");
+  }
+  runsThisVisit++;
+  const total = runSoFar;
+  const isBest = await recordRun(scores, total);
+  running = false;
+  renderPill(); renderBoard();
+  showResults(scores, total, isBest);
+}
+
+function showResults(scores, total, isBest) {
+  const best = num(me.bestTotal);
+  const postable = canPost() && unposted();
+  show(`<div class="card">
+    <span class="eyebrow">Run complete</span>
+    <h2>${isBest ? "New personal best!" : "Nice run!"}</h2>
+    <div class="big-score">${fmt(total)}</div>
+    ${breakdownHtml(scores)}
+    <p class="note">${isBest ? "This is your best score so far." : `Your best is still ${fmt(best)}.`}
+      ${postable ? " Post it to the leaderboard now or any time later." : myPost ? " Your posted score is on the leaderboard." : ""}</p>
+    <div class="btn-row">
+      <button class="btn" id="go" type="button">Play again</button>
+      ${postable ? `<button class="btn ghost" id="postOpen" type="button">Post to leaderboard</button>` : ""}
+    </div>
+    <div id="postArea"></div>
+    <div class="btn-row">
+      <button class="link-btn" id="challenge" type="button">Copy a challenge for Slack</button>
+      <button class="link-btn" id="homeGo" type="button">Back to start</button>
+    </div>
+    <div id="copyArea"></div>
+  </div>`);
+  document.getElementById("go").addEventListener("click", startRun);
+  document.getElementById("homeGo").addEventListener("click", () => renderHome());
+  const ch = document.getElementById("challenge");
+  ch.addEventListener("click", () => copyChallenge(ch));
+  const po = document.getElementById("postOpen");
+  if (po) po.addEventListener("click", () => {
+    po.remove();
+    document.getElementById("postArea").innerHTML = nameFormHtml(`Post your best (${fmt(best)})`);
+    bindNameForm();
+    const inp = document.getElementById("nameInput");
+    inp.focus(); inp.select();
+  });
+}
+
+renderHome();
+boot();
+})();
+</script>
+</body>
+</html>

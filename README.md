@@ -33,16 +33,12 @@ Use only the **anon public** key. Never put the `service_role` key in this proje
   as someone else.
 - The leaderboard shows each player's best run.
 
-## 2. Deploy on Vercel
+## 2. Hosting
 
-This is a static site, so no build step is needed.
+The game is hosted on GitHub Pages at **https://kavineesh12.github.io/diwali-triathlon/**, built from the
+`main` branch. Every push to `main` goes live within a minute or two. No build step is needed.
 
-- **From GitHub:** push this folder to a repo, then in Vercel choose **Add New → Project**, import the
-  repo and click **Deploy** (Framework preset: Other).
-- **From this computer:** `npx vercel` in this folder, then `npx vercel --prod`.
-
-After the first deploy, put the public link in `config.js` as `gameUrl` so the "Copy a challenge"
-message uses it, and redeploy.
+The public link is also set in `config.js` as `gameUrl`, so the "Copy a challenge" message uses it.
 
 ## Managing the leaderboard
 

@@ -3,6 +3,6 @@
 window.TRIATHLON_CONFIG = {
   supabaseUrl: "https://ygiaahcshunidhqneffl.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlnaWFhaGNzaHVuaWRocW5lZmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MDY3MjUsImV4cCI6MjEwOTI4MjcyNX0.zUXkFUKAh78zg1OVJ8ZsnXI2HKDckL5vKrR-meDbACU",
-  // Optional: the public link people should share, e.g. "https://diwali-triathlon.vercel.app"
-  gameUrl: "",
+  // The public link people share in the "Copy a challenge" message.
+  gameUrl: "https://kavineesh12.github.io/diwali-triathlon/",
 };
